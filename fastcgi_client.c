@@ -63,15 +63,16 @@ PHP_METHOD(FastCGI_Client, connect)
 	int fd;
 	zval *instance;
 	char *addr;
-	int addr_len;
-	int port = 9000;
+	long addr_len;
+	long port=9000;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"s|l", &addr, &addr_len, &port) == FAILURE)
 	{
 		RETURN_FALSE;
 	}
 
+    printf("地址%s 地址长度%d 端口%d",addr,addr_len,port);
 	instance = getThis();
 
 	fd = fastcgi_connect(addr, (short)port);
@@ -93,7 +94,7 @@ PHP_METHOD(FastCGI_Client, set_param)
 	int fd;
 	zval *instance, *sock;
 	char *key, *val;
-	int key_len, val_len;
+	long key_len, val_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ss", &key, &key_len, &val, &val_len) == FAILURE)
@@ -104,7 +105,7 @@ PHP_METHOD(FastCGI_Client, set_param)
 	instance = getThis();
 
 	sock = zend_read_property(fastcgi_ce,
-		instance, ZEND_STRL(FASTCGI_CONNECTION_SOCKET), 0 TSRMLS_CC);
+		instance, ZEND_STRL(FASTCGI_CONNECTION_SOCKET), 0 TSRMLS_CC,NULL);
 
 	if (Z_LVAL_P(sock) < 0
 		|| fastcgi_send_param(Z_LVAL_P(sock), key, key_len, val, val_len) == -1)
@@ -124,7 +125,7 @@ PHP_METHOD(FastCGI_Client, start_request)
 	instance = getThis();
 
 	sock = zend_read_property(fastcgi_ce,
-		instance, ZEND_STRL(FASTCGI_CONNECTION_SOCKET), 0 TSRMLS_CC);
+		instance, ZEND_STRL(FASTCGI_CONNECTION_SOCKET), 0 TSRMLS_CC,NULL);
 
 	if (Z_LVAL_P(sock) < 0
 		|| fastcgi_send_end_request(Z_LVAL_P(sock)) == -1)
@@ -148,7 +149,7 @@ PHP_METHOD(FastCGI_Client, read_response)
 	instance = getThis();
 
 	sock = zend_read_property(fastcgi_ce,
-		instance, ZEND_STRL(FASTCGI_CONNECTION_SOCKET), 0 TSRMLS_CC);
+		instance, ZEND_STRL(FASTCGI_CONNECTION_SOCKET), 0 TSRMLS_CC,NULL);
 	if (Z_LVAL_P(sock) < 0){
 		RETURN_FALSE;
 	}
@@ -200,7 +201,7 @@ PHP_METHOD(FastCGI_Client, read_response)
 		}
 	}
 
-	RETURN_STRINGL(response, total, 0);
+	RETURN_STRINGL(response, total);
 }
 
 
@@ -211,7 +212,7 @@ PHP_METHOD(FastCGI_Client, close)
 	instance = getThis();
 
 	sock = zend_read_property(fastcgi_ce,
-		instance, ZEND_STRL(FASTCGI_CONNECTION_SOCKET), 0 TSRMLS_CC);
+		instance, ZEND_STRL(FASTCGI_CONNECTION_SOCKET), 0 TSRMLS_CC,NULL);
 
 	if (Z_LVAL_P(sock) < 0) {
 		RETURN_FALSE;
@@ -233,7 +234,7 @@ PHP_MINIT_FUNCTION(fastcgi_client)
 
 	INIT_CLASS_ENTRY(ce, "FastCGI_Client", fastcgi_methods);
 
-	fastcgi_ce = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+	fastcgi_ce = zend_register_internal_class_ex(&ce, NULL);
 
 	zend_declare_property_long(fastcgi_ce,
 		ZEND_STRL(FASTCGI_CONNECTION_SOCKET), -1, ZEND_ACC_PRIVATE TSRMLS_CC);
