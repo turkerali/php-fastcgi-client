@@ -72,7 +72,6 @@ PHP_METHOD(FastCGI_Client, connect)
 		RETURN_FALSE;
 	}
 
-    printf("地址%s 地址长度%d 端口%d",addr,addr_len,port);
 	instance = getThis();
 
 	fd = fastcgi_connect(addr, (short)port);
